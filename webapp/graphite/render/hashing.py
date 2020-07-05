@@ -225,7 +225,7 @@ class JumpConsistentHashRing(ConsistentHashRing):
     # used only in tests?
     def get_node(self, key):
         assert self.ring
-        position = self.compute_ring_position(key)
+        position = self.compute_ring_position(key, modulo=self.ring_len)
         return self.ring[position]
 
     # this used in carbonlink.py and carbon too
@@ -241,15 +241,14 @@ class JumpConsistentHashRing(ConsistentHashRing):
         hash = fnv1a(key.encode('utf-8'), mode=64)  # jump hash accepts only integers
         ring = self.ring
         index = self.ring_len
-        position = 0
-        r = self.replica_count
+        replica_count = self.replica_count
         while index > 0:
             position = jump_hash(hash, index)
             nodes.add(self.ring[position])
             yield self.ring[position]
-            r = r - 1
-            if r <= 0:
-                break
+            replica_count = replica_count - 1
+            if replica_count <= 0:
+                return
             # use xorshift to generate a different hash for input in the jump hash again
             hash = xorshift64(hash)
             # remove the server we just selected, such that we can
