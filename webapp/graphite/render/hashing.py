@@ -17,6 +17,7 @@ from hashlib import md5
 from itertools import chain
 import bisect
 import sys
+from builtins import int
 
 try:
     import mmh3
@@ -65,7 +66,7 @@ try:
     import jump
 
     def jump_hash(key, num_buckets):
-        return jump.hash(key, num_buckets)
+        return jump.hash(int(key), num_buckets)
 except ImportError:
     def jump_hash(key, num_buckets):
         """Fast, minimal memory, consistent hash algorithm.
@@ -73,8 +74,6 @@ except ImportError:
         C version is 10 times faster, use jump module if possible
         Accepts only integer as input
         """
-        if sys.version_info >= (3, 0):
-            from builtins import int
         b, j = -1, 0
         if num_buckets < 1:
             raise ValueError(
@@ -82,7 +81,7 @@ except ImportError:
             )
         while j < num_buckets:
             b = int(j)
-            key = ((key * int(2862933555777941757)) + 1) & 0xFFFFFFFFFFFFFFFF
+            key = ((int(key) * int(2862933555777941757)) + 1) & 0xFFFFFFFFFFFFFFFF
             j = float(b + 1) * (float(1 << 31) / float((key >> 33) + 1))
         return int(b)
 
@@ -128,13 +127,13 @@ def carbonHash(key, hash_type, modulo=1):
     if hash_type == 'fnv1a_ch':
         big_hash = int(fnv1a(key.encode('utf-8')))
         small_hash = (big_hash >> 16) ^ (big_hash & 0xffff)
+    elif hash_type == 'jump_fnv1a_ch':
+        big_hash = int(fnv1a(key.encode('utf-8'), mode=64))
+        small_hash = jump_hash(big_hash, modulo)
     elif hash_type == 'mmh3_ch':
         if mmh3 is None:
             raise Exception('Install "mmh3" to use this hashing function.')
         small_hash = mmh3.hash(key)
-    elif hash_type == 'jump_fnv1a_ch':
-        big_hash = int(fnv1a(key.encode('utf-8'), mode=64))
-        small_hash = jump_hash(big_hash, modulo)
     else:
         big_hash = compactHash(key)
         small_hash = int(big_hash[:4], 16)
