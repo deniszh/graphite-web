@@ -17,16 +17,20 @@
  - Revert symlink fix (#2604, @piotrt1212)
  - Lock whitenoise dependency version (#2606, @Carles-Figuerola)
  - Prevent xss (#2620, @StephenDsouza90)
+ - fix & improve docs for *WithWildcards functions (#2625, @Dieterbe)
+ - Fix multi-threading issue in render endpoint by making grammar a thread-safe object (fixes #2626) (#2627, @romanek-adam)
 
 ### Features / Enhancements
  - [Settings] Allow pickle protocol to be configurable for carbonlink requests. (#2591, @alikhtag)
  - List Promitor as a collector tool (#2605, @tomkerkhove)
+ - REsynthesize: New script forked from Synthesize to install Graphite on CentOS (#2631, @deividgdt)
 
 ## carbon
 
 ### Bug fixes
  - remove carbon-client.py, is broken for 4 years (#890, @piotr1212)
  - spelling (#893, @jsoref)
+ - Update storage-aggregation.conf.example for #768 (#899, @antonsoroko)
  
 ## whisper
 
@@ -72,7 +76,7 @@
  - better error messages with type indications (#2543, @replay)
  - log grafana dashboard/panel id headers (#2564, @replay)
  - Allow floats in scaleToSeconds() (#2565, @replay)
-    
+
 ## carbon
 
 ### Bug Fixes
