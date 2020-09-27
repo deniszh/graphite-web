@@ -21,6 +21,7 @@ try:
     from builtins import int
 except ImportError:
     import __builtin__ as builtins
+    from builtins import int
 
 try:
     import mmh3
@@ -62,8 +63,10 @@ except ImportError:
                 hval = (hval * fnv_prime) % uint_max
         return hval
 
+
 def fnv32a(data, seed=2166136261):
     return fnv1a(data, seed, mode=32)
+
 
 try:
     import jump
@@ -88,6 +91,7 @@ except ImportError:
             j = float(b + 1) * (float(1 << 31) / float((key >> 33) + 1))
         return int(b)
 
+
 def xorshift64(x):
     """
     XorShift generates a predictable random-ish hash from the given integer.
@@ -102,6 +106,7 @@ def xorshift64(x):
     x ^= x << 25
     x ^= x >> 27
     return (x * 2685821657736338717)
+
 
 def hashRequest(request):
     # Normalize the request parameters to ensure we're deterministic
@@ -207,6 +212,7 @@ class ConsistentHashRing:
                 yield next_node
 
             index = (index + 1) % self.ring_len
+
 
 class JumpConsistentHashRing(ConsistentHashRing):
     def __init__(self, nodes, replica_count=1, hash_type='jump_fnv1a_ch'):
