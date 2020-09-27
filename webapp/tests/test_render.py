@@ -1063,3 +1063,14 @@ class ConsistentHashRingTestFNV1A(TestCase):
         self.assertEqual(hashring.get_node(
                         'stats.checkout.cluster.padamski-wro.api.v1.payment-initialize.count'),
                         ('127.0.0.3', '866a18b81f2dc4649517a1df13e26f28'))
+
+
+class ConsistentHashRingTestJumpHash(TestCase):
+    def test_chr_compute_ring_position_jumphash(self):
+        pass
+
+    def test_chr_add_node_jumphash(self):
+        pass
+
+    def test_chr_get_node_jumphash(self):
+        pass

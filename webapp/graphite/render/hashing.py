@@ -17,7 +17,10 @@ from hashlib import md5
 from itertools import chain
 import bisect
 import sys
-from builtins import int
+try:
+    from builtins import int
+except ImportError:
+    import __builtin__ as builtins
 
 try:
     import mmh3
@@ -216,7 +219,7 @@ class JumpConsistentHashRing(ConsistentHashRing):
         # https://github.com/grobian/carbon-c-relay/blob/v3.6/consistent-hash.c#L293
         # https://github.com/jjneely/buckytools/blob/master/hashing/jump.go#L96
         (server, instance) = key  # (server, instance) = node
-        if instance is 'None' or instance == '':
+        if instance == 'None' or not instance:
             self.ring.append(key)
         else:
             bisect.insort(self.ring, key)
