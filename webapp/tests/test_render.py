@@ -11,7 +11,7 @@ import django
 from mock import patch
 
 from graphite.render.datalib import TimeSeries
-from graphite.render.hashing import ConsistentHashRing, hashRequest, hashData
+from graphite.render.hashing import ConsistentHashRing, hashRequest, hashData, fnv1a, xorshift64, JumpConsistentHashRing
 from graphite.render.evaluator import evaluateTarget, extractPathExpressions, evaluateScalarTokens, invalidParamLogMsg
 from graphite.render.functions import NormalizeEmptyResultError
 from graphite.render.grammar import grammar
@@ -1066,11 +1066,140 @@ class ConsistentHashRingTestFNV1A(TestCase):
 
 
 class ConsistentHashRingTestJumpHash(TestCase):
+    def test_fnv1a64(self):
+        data = [
+            ("foobar", 0x85944171f73967e8),
+            ("changed", 0xdf38879af614707b),
+            ("5min.prod.dc06.graphite-web006-g6.kernel.net.netfilter.nf_conntrack_max", 0xdb7b58ef171eee9f)
+        ]
+        for i in data:
+            self.assertEqual(i[1], fnv1a(i[0], mode=64))
+
+    def test_xorshift64(self):
+        data = [
+            (111111111, 3590630012556359785),
+            (3590630012556359785, 15902033362624058107),
+            (15902033362624058107, 2254935917702512913),
+            (2254935917702512913, 12130756204385297808),
+            (0,0)
+        ]
+        for i in data:
+            self.assertEqual(i[1], xorshift64(i[0]))
+
     def test_chr_compute_ring_position_jumphash(self):
-        pass
+        hosts_without_instance = [("graphite010-g5",""),
+                                  ("graphite011-g5",""),
+                                  ("graphite012-g5",""),
+                                  ("graphite013-g5",""),
+                                  ("graphite014-g5",""),
+                                  ("graphite015-g5",""),
+                                  ("graphite016-g5",""),
+                                  ("graphite017-g5",""),
+                                  ("graphite018-g5",""),
+                                  ("graphite-data019-g5",""),
+                                  ("graphite-data020-g5",""),
+                                  ("graphite-data021-g5",""),
+                                  ("graphite-data022-g5",""),
+                                  ("graphite-data023-g5",""),
+                                  ("graphite-data024-g5",""),
+                                  ("graphite-data025-g5",""),
+                                  ("graphite-data026-g5",""),
+                                  ("graphite-data027-g5",""),
+                                  ("graphite-data028-g5",""),
+                                  ("graphite-data029-g5",""),
+                                  ("graphite-data030-g5",""),
+                                  ("graphite-data031-g5",""),
+                                  ("graphite-data032-g5",""),
+                                  ("graphite-data033-g5",""),
+                                  ("graphite-data034-g5",""),
+                                  ("graphite-data035-g5",""),
+                                  ("graphite-data036-g5",""),
+                                  ("graphite-data037-g5",""),
+                                  ("graphite-data038-g5",""),
+                                  ("graphite-data039-g5",""),
+                                  ("graphite-data040-g5",""),
+                                  ("graphite-data041-g5",""),
+                                  ("graphite-data042-g5",""),
+                                  ("graphite-data043-g5",""),
+                                  ("graphite-data044-g5",""),
+                                  ("graphite-data045-g5",""),
+                                  ("graphite-data046-g5",""),
+                                  ("graphite-data047-g5",""),
+                                  ("graphite-data048-g5",""),
+                                  ("graphite-data049-g5",""),
+                                  ("graphite-data050-g5",""),
+                                  ("graphite-data051-g5",""),
+                                  ("graphite-data052-g5",""),
+                                  ("graphite-data053-g5",""),
+                                  ("graphite-data054-g5","")]
+        hashring = JumpConsistentHashRing(hosts_without_instance)
+        data = [
+            ("aaaa",                                                                    ('graphite-data020-g5', '')),
+            ("foobar",                                                                  ('graphite-data043-g5', '')),
+            ("suebob.foo.honey.i.shrunk.the.kids",                                      ('graphite-data048-g5', '')),
+            ("5min.prod.dc06.graphite-web006-g6.kernel.net.netfilter.nf_conntrack_max", ('graphite014-g5', ''))
+        ]
+        for i in data:
+            self.assertEqual(i[1], hashring.get_node(i[0]))
 
     def test_chr_add_node_jumphash(self):
-        pass
+        hosts_without_instance = [("graphite010-g5",""),
+                                  ("graphite011-g5",""),
+                                  ("graphite012-g5",""),
+                                  ("graphite013-g5",""),
+                                  ("graphite014-g5",""),
+                                  ("graphite015-g5",""),
+                                  ("graphite016-g5",""),
+                                  ("graphite017-g5",""),
+                                  ("graphite018-g5","")]
+        hashring = JumpConsistentHashRing(hosts_without_instance)
+        self.assertEqual(hashring.add_node(("graphite-data019-g5","")),
+                         hosts_without_instance.append(('graphite-data019-g5','')))
 
-    def test_chr_get_node_jumphash(self):
+    def test_chr_add_node_instance_jumphash(self):
+        hosts = [("graphite011-g5","4"),
+                 ("graphite012-g5","aaa"),
+                 ("graphite013-g5","bbb"),
+                 ("graphite014-g5","zzz"),
+                 ("graphite015-g5","None"),
+                 ("graphite017-g5","xx"),
+                 ("graphite010-g5","1"),
+                 ("graphite016-g5","0456"),
+                 ("graphite017-g5","2"),
+                 ("graphite018-g5","")]
+        sorted_ring = [('graphite-data019-g5', '4'),
+                       ('graphite010-g5', '1'),
+                       ('graphite011-g5', '4'),
+                       ('graphite012-g5', 'aaa'),
+                       ('graphite013-g5', 'bbb'),
+                       ('graphite014-g5', 'zzz'),
+                       ('graphite015-g5', 'None'),
+                       ('graphite016-g5', '0456'),
+                       ('graphite017-g5', '2'),
+                       ('graphite017-g5', 'xx'),
+                       ('graphite018-g5', '')]
+        hashring = JumpConsistentHashRing(hosts)
+        hashring.add_node(("graphite-data019-g5","4"))
+        self.assertEqual(hashring.ring, sorted_ring)
+
+    def test_chr_compute_ring_position_instance_jumphash(self):
+        hosts_with_instances = [
+            ("graphite010-g5", "5"),
+            ("graphite011-g5", "1"),
+            ("graphite012-g5", "4"),
+            ("graphite013-g5", "3"),
+            ("graphite-data019-g5", "2"),
+            ("graphite-data020-g5", "6"),
+            ("graphite-data021-g5", "0")
+        ]
+        hashring = JumpConsistentHashRing(hosts_with_instances)
+        #self.assertEqual(hashring.ring, [])
+        data = [
+            ("aaaa",                                                                    ('graphite-data020-g5', '6')),
+            ("foobar",                                                                  ('graphite010-g5','5')),
+            ("suebob.foo.honey.i.shrunk.the.kids",                                      ('graphite-data021-g5', '0')),
+            ("5min.prod.dc06.graphite-web006-g6.kernel.net.netfilter.nf_conntrack_max", ('graphite012-g5', '4'))
+        ]
+        #for i in data:
+        #    self.assertEqual(i[1], hashring.get_node(i[0]))
         pass
