@@ -19,29 +19,44 @@
  - Prevent xss (#2620, @StephenDsouza90)
  - fix & improve docs for *WithWildcards functions (#2625, @Dieterbe)
  - Fix multi-threading issue in render endpoint by making grammar a thread-safe object (fixes #2626) (#2627, @romanek-adam)
+ - Patch /static/ directory in Apache docs (#2635, @djmetzle)
+ - Backport unicode fix from piotr1212/graphite-web@17e23ef (#2643, @piotr1212 / @deniszh)
+ - Update whisper.rst with Python 3 fix (#2649, @cdeil)
 
 ### Features / Enhancements
  - [Settings] Allow pickle protocol to be configurable for carbonlink requests. (#2591, @alikhtag)
  - List Promitor as a collector tool (#2605, @tomkerkhove)
  - REsynthesize: New script forked from Synthesize to install Graphite on CentOS (#2631, @deividgdt)
  - weightedAverage: raise an InputParameterError exception if the number of series passed for the values is different to the number passed for the weights (#2636, @fkaleo)
-
+ - Find api documentation (Fixing #2616) (#2646, @deniszh)
+ - Add aggregateSeriesLists() and aliases for diffSeriesLists(), sumSeriesLists(), multiplySeriesLists() (#2647, @alikhtag)
+ 
 ## carbon
 
 ### Bug fixes
  - remove carbon-client.py, is broken for 4 years (#890, @piotr1212)
  - spelling (#893, @jsoref)
  - Update storage-aggregation.conf.example for #768 (#899, @antonsoroko)
+ - Provide more complete list of aggregation options (#901, @neul)
+ - Fixes #908 (PTC-W0016) Unnecessary comprehension (#909, @rohankhanna)
+ - Fixes #906 (BAN-B101) Assert statement used outside of tests (#907, @rohankhanna)
 
 ### Features / Enhancements
- -  add config option to turn off logging of lost connections (#900, @tbenz9) 
+ - add config option to turn off logging of lost connections (#900, @tbenz9)
+ - Improve carbon performance for non-tagged series (#903, @deniszh)
 
 ## whisper
 
 ### Bug fixes
  - fix reisze whisper from low retention to high retention will lose some data (#293, @Xu-Wentao) 
  - Fixing test for python 2.7 (#295, @deniszh)
- 
+
+## carbonate
+
+### Features / Enhancements
+ - Support for Aggregated-Consistent Hash (#121 / #56, @deniszh / @klynch)
+ - Handle transient network failures and support custom staging dir path (#122, @ryangsteele)
+
 # 1.1.7
 
 ## graphite-web
